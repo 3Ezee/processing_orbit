@@ -1,75 +1,82 @@
 class Particle {
-  float _posX;
-  float _posY;
+  float _x;
+  float _y;
   
-  float _pos0Y;
+  float _y0;
+  float _x0;
   
-  float _voY;
-  float _vY;
-  float _acel;
+  float _vy;
+  float _vx;
+  float _vy0;
+  float _vx0;
+  float _a;
+  float _t=0;
   
   float _dir;
   float _timeTotal;
   float _step = 0.1;
-  float _timeCount=0;
+  
+  boolean _up;
   
   int pass;
   
-  Particle(float posX, float posY, float voY, float acel) 
+  Particle(float x, float y, float vx, float vy, float a) 
   {
-    _posX = posX;
-    _pos0Y = posY;
-    _posY = posY;
-    _voY  = voY;
-    _acel = acel;
+    _x0 = _x = x;
+    _y0 = _y = y;
+    _vx0 = _vx = vx;
+    _vy0 = _vy = vy;
     
-    _vY = voY;
-    _dir = 1;
-    
-    _timeTotal = GetTime(); //<>//
-    pass = 1;
-  }
-  
-  float GetTime()
-  {
-    return (_voY*_voY)/(2*(_acel));
+    _a = a; //<>//
   }
   
   void update()
   {
-    moveY();
+    move();
   } 
   
   void show()
   {
     fill(255);
     noStroke();
-    ellipse(_posX,_posY,15,15);
+    ellipse(_x,_y,15,15);
     
-    textSize(16);
-    text("pos y: "+ _posY, 1, 15); 
-    fill(0, 102, 153);  
-    textSize(16);
-    text("vel y: "+_voY + _acel * _timeCount, 15, 30); 
-    fill(0, 102, 153);
-    text("vo y: "+_voY , 20, 50); 
-    fill(0, 102, 153);
-    text("_acel: "+ _acel, 20, 70); 
-    fill(0, 102, 153);
-    text("time count: "+_timeCount, 20, 90); 
-    fill(0, 102, 153);
+    println("y: "+_y0+", y: " +_y +", vy0 " +_vy0+" vel: " + MRUVGetV(_vy0, _a, _timeTotal)+" up: " + _up + _a  );
+  }
+  
+  void move()
+  {
+    moveY(); //<>//
   }
   
   void moveY()
   {
-    _posY = _posY + GetVY(); //<>//
+    _timeTotal += 0.125;
+    //textSize(16);
+    //text("timer y: "+ _timeTotal, 1, 15); 
+    //fill(0, 102, 153);  
+    if (_up && _y<_y0 )
+    {
+      _up = !_up;
+      _a = -_a;
+    }
+    else if(!_up && _y>_y0)
+    {
+      _up = !_up;
+      _a = -_a;
+    }
+    
+    _y = MRUVGetPos(_y0, _vy0, _timeTotal, _a);
+  }
+ //<>//
+  
+  float MRUVGetPos(float p0, float v0, float t, float a)
+  {
+     return p0 + v0*t + 0.5*a*sq(t);
   }
   
-  float GetVY()
+  float MRUVGetV(float v0,float a, float t)
   {
-    if
-    
-    _timeCount = _timeCount + _step;
-    return _voY + _acel * _timeCount;
-  } //<>//
+    return v0 + a*t;
+  }
 }
