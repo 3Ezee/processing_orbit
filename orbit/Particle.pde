@@ -10,69 +10,123 @@ class Particle {
   float _vy0;
   float _vx0;
   float _a;
+  float _ax;
   float _t=0;
   
   float _dir;
   float _timeTotal;
-  float _step = 0.1;
+  float _timeTotalX;
+  float _step = 0.125;
   
   boolean _up;
+  boolean _left;
   
   int pass;
   
-  Particle(float x, float y, float vx, float vy, float a) 
+  boolean _front;
+  
+  Particle(float x, float y, float vx, float vy, float ax, float a) 
   {
-    _x0 = _x = x;
-    _y0 = _y = y;
+    _x0  = _x = x;
+    _y0  = _y = y;
     _vx0 = _vx = vx;
     _vy0 = _vy = vy;
-    
-    _a = a; //<>//
+    _a   = a;
+    _ax = ax; //<>//
   }
   
   void update()
   {
     move();
+    
+    if(MRUVGetV(_vx0,_a,_timeTotalX)== 0){
+      _front = !_front;
+    }
   } 
   
-  void show()
+  void show(int i)
   {
-    fill(255);
-    noStroke();
-    ellipse(_x,_y,15,15);
+    if(_front && i ==2){
+      fill(255);
+      noStroke();
+      ellipse(_x,_y,15,15);    
+    }
     
-    println("y: "+_y0+", y: " +_y +", vy0 " +_vy0+" vel: " + MRUVGetV(_vy0, _a, _timeTotal)+" up: " + _up + _a  );
+    if(!_front && i ==1){
+      fill(255);
+      noStroke();
+      ellipse(_x,_y,15,15);    
+    }
+    
+    
+    //if(round(MRUVGetV(_vy0,_a,_timeTotal))==0)
+    //{
+    //  textSize(12);
+    //  text(str(_y), _x, _y); 
+    //  fill(0, 102, 153);  
+    //}
+      
+     //textSize(12);
+     //text(str(round(MRUVGetV(_vy0,_a,_timeTotal)))+"m/s", _x+5, _y); 
   }
   
   void move()
   {
-    moveY(); //<>//
+    
+    moveY();
+    moveX(); //<>//
+  }
+  
+  void moveX()
+  {
+    _timeTotalX += _step;
+    if (_x > _x0 && !_left)
+    {
+      _ax = -abs(_ax);
+      _vx0 = abs(_vx0);
+      _left = !_left;
+      _timeTotalX = 0;
+    }
+    else if( _x < _x0 && _left)
+    {
+      _ax = abs(_ax);
+      _vx0 = -abs(_vx0);
+      _left = !_left;
+      _timeTotalX = 0;
+    }
+    
+    _x = MRUVGetPos(_x0, _vx0, _timeTotalX, _ax);
   }
   
   void moveY()
   {
-    _timeTotal += 0.125;
-    //textSize(16);
-    //text("timer y: "+ _timeTotal, 1, 15); 
-    //fill(0, 102, 153);  
-    if (_up && _y<_y0 )
+    _timeTotal += _step;
+ 
+    if (_y > _y0 && !_up)
     {
+      _a = -abs(_a);
+      _vy0 = abs(_vy0);
       _up = !_up;
-      _a = -_a;
+      _timeTotal = 0;
     }
-    else if(!_up && _y>_y0)
+    else if( this._y < _y0 && _up)
     {
+      _a = abs(_a);
+      _vy0 = -abs(_vy0);
       _up = !_up;
-      _a = -_a;
+      _timeTotal = 0;
     }
     
-    _y = MRUVGetPos(_y0, _vy0, _timeTotal, _a);
+    this._y = MRUVGetPos(_y0, _vy0, _timeTotal, _a);
   }
  //<>//
   
   float MRUVGetPos(float p0, float v0, float t, float a)
   {
-     return p0 + v0*t + 0.5*a*sq(t);
+    float res;
+    
+    res = p0 + v0*t + 0.5*a*sq(t);
+    return res; 
   }
   
   float MRUVGetV(float v0,float a, float t)
